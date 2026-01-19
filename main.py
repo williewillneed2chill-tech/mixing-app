@@ -58,4 +58,16 @@ async def mix_beat(payload: dict):
     combined.export(out, format=output_format)
     out.seek(0)
 
-    return {"status": "complete", "message": "Mixed successfully", "bytes": len(out.getvalue())}
+       out = io.BytesIO()
+    combined.export(out, format=output_format)
+    out.seek(0)
+
+    filename = f"mix_{uuid.uuid4()}.{output_format}"
+    media_type = "audio/wav" if output_format == "wav" else "audio/mpeg"
+
+    return StreamingResponse(
+        out,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
+
